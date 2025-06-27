@@ -14,16 +14,13 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Generate Xcode project
-        run: swift package generate-xcodeproj --output arrow-swift.xcodeproj
-
       - name: Prepare archive dir
         run: mkdir -p "$GITHUB_WORKSPACE/archives"
 
       - name: Build device archive
         run: |
           xcodebuild archive \
-            -project arrow-swift.xcodeproj \
+            -package-path "$GITHUB_WORKSPACE" \
             -scheme Arrow \
             -destination="generic/platform=iOS" \
             -archivePath "$GITHUB_WORKSPACE/archives/Arrow-iOS.xcarchive" \
@@ -33,7 +30,7 @@ jobs:
       - name: Build simulator archive
         run: |
           xcodebuild archive \
-            -project arrow-swift.xcodeproj \
+            -package-path "$GITHUB_WORKSPACE" \
             -scheme Arrow \
             -destination="generic/platform=iOS Simulator" \
             -archivePath "$GITHUB_WORKSPACE/archives/Arrow-Sim.xcarchive" \
