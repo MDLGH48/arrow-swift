@@ -16,8 +16,8 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: List available schemes
-        run: xcodebuild -list
+      # - name: List available schemes
+      #   run: xcodebuild -list
 
       # 2) Make sure Xcode has someplace to put archives
       - name: Prepare archive dir
@@ -27,7 +27,7 @@ jobs:
       - name: Build device archive
         run: |
           xcodebuild archive \
-            -scheme arrow-swift \
+            -scheme ArrowSwift \
             -destination="generic/platform=iOS" \
             -archivePath "$GITHUB_WORKSPACE/archives/Arrow-iOS.xcarchive" \
             SKIP_INSTALL=NO \
@@ -37,7 +37,7 @@ jobs:
       - name: Build simulator archive
         run: |
           xcodebuild archive \
-            -scheme arrow-swift \
+            -scheme ArrowSwift \
             -destination="generic/platform=iOS Simulator" \
             -archivePath "$GITHUB_WORKSPACE/archives/Arrow-Sim.xcarchive" \
             SKIP_INSTALL=NO \
