@@ -1,0 +1,58 @@
+name: Build & Release Arrow XCFramework
+
+# Trigger on every push to main *and* on tag creation
+on:
+  push:
+    branches: [ "build-pkg" ]
+  release:
+    types: [ "created" ]
+
+jobs:
+  build-xcframework:
+    runs-on: macos-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Build device archive
+        run: |
+          xcodebuild archive \
+            -scheme Arrow \
+            -destination="generic/platform=iOS" \
+            -archivePath "$GITHUB_WORKSPACE/archives/Arrow-iOS" \
+            SKIP_INSTALL=NO \
+            BUILD_LIBRARY_FOR_DISTRIBUTION=YES
+
+      - name: Build simulator archive
+        run: |
+          xcodebuild archive \
+            -scheme Arrow \
+            -destination="generic/platform=iOS Simulator" \
+            -archivePath "$GITHUB_WORKSPACE/archives/Arrow-Sim" \
+            SKIP_INSTALL=NO \
+            BUILD_LIBRARY_FOR_DISTRIBUTION=YES
+
+      - name: Create XCFramework
+        run: |
+          xcodebuild -create-xcframework \
+            -framework "$GITHUB_WORKSPACE/archives/Arrow-iOS.xcarchive/Products/Library/Frameworks/Arrow.framework" \
+            -framework "$GITHUB_WORKSPACE/archives/Arrow-Sim.xcarchive/Products/Library/Frameworks/Arrow.framework" \
+            -output "$GITHUB_WORKSPACE/Arrow.xcframework"
+
+      - name: Package XCFramework as zip
+        run: |
+          cd $GITHUB_WORKSPACE
+          zip -r Arrow.xcframework.zip Arrow.xcframework
+
+      - name: Create GitHub Release (if not exist)
+        if: github.event_name == 'push'
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: latest
+          name: XCFramework Release
+          body: Release of Arrow.xcframework
+
+      - name: Upload XCFramework to Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: Arrow.xcframework.zip
